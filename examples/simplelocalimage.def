@@ -1,0 +1,7 @@
+Bootstrap: localimage
+From: opensuseleap.sif
+
+%post
+zypper --non-interactive --gpg-auto-import-keys refresh
+zypper install -y  gzip gcc-c++ gcc-fortran hostname
+

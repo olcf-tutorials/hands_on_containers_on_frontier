@@ -1,0 +1,10 @@
+Bootstrap: localimage
+From: simple.sif
+
+%files
+helloworld.c /
+
+%post
+zypper --gpg-auto-import-keys --non-interactive refresh
+zypper install -y gcc-c++
+gcc -o helloworld helloworld.c
