@@ -1,0 +1,6 @@
+Bootstrap: oras
+From: savannah.ornl.gov/olcf-container-images/frontier/opensuse/gnu/cpe:23.12
+
+%post
+zypper install -y hostname
+

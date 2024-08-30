@@ -1,2 +1,279 @@
 This repository is to accompany the Container training conducted at the 2024 OLCF User Meeting
 
+# Follow along
+
+NOTE: if you find yourself encountering an error that looks like the below
+when you execute `apptainer pull` or `apptainer build`, then try using the flag
+`--disable-cache` i.e. `apptainer pull --disable-cache`. 
+
+```
+FATAL:   While performing build: conveyor failed to get: while fetching library image: cached file hash(sha256:74b3763bbffd3cbaa355240994d684318fe64087fd1f70bdd8eaa6c64072683b) and expected hash(sha256:4fa8838b548fe90a161541ba06777ca32ed235666b0f55d7df34150dbd11c237) does not match
+```
+
+Now onto the tutorial!
+
+## apptainer pull, shell, exec commands
+
+apptainer pull defaults to dockerhub, so you don't need to specify full url
+Don't forget the `docker://` prefix if pulling from some container registry 
+(dockerhub, quay, harbor, etc) and the image is an OCI image.
+
+```
+apptainer pull opensuse.sif docker://opensuse/leap:15.4
+```
+
+better practice is to use full url
+
+```
+apptainer pull opensuse.sif docker://docker.io/opensuse/leap:15.4
+```
+
+To start a container and open an interactive shell with the image you pulled,
+ use `apptainer shell`
+
+```
+apptainer shell opensuse.sif
+Apptainer> cat /etc/os-release
+NAME="openSUSE Leap"
+VERSION="15.4"
+ID="opensuse-leap"
+ID_LIKE="suse opensuse"
+VERSION_ID="15.4"
+PRETTY_NAME="openSUSE Leap 15.4"
+ANSI_COLOR="0;32"
+CPE_NAME="cpe:/o:opensuse:leap:15.4"
+BUG_REPORT_URL="https://bugs.opensuse.org"
+HOME_URL="https://www.opensuse.org/"
+DOCUMENTATION_URL="https://en.opensuse.org/Portal:Leap"
+LOGO="distributor-logo-Leap"
+```
+
+The container you are pulling or building has to match the capabilities and 
+architecture of the hardware you are using. Try pulling an Nvidia pytorch 
+container onto Frontier and running it. It will fail.
+
+```
+apptainer pull pytorch.sif docker://nvcr.io/nvidia/pytorch:24.07-py3
+apptainer shell --rocm pytorch.sif
+> python3
+>>> import torch
+>>> t = torch.rand(2,3,4)
+>>> t.to('cuda')
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "/usr/local/lib/python3.10/dist-packages/torch/cuda/__init__.py", line 311, in _lazy_init
+    torch._C._cuda_init()
+RuntimeError: Found no NVIDIA driver on your system. Please check that you have an NVIDIA GPU and installed a driver from http://www.nvidia.com/Download/index.aspx
+```
+
+To start a container and execute a command within it, use `apptainer exec`
+
+```
+apptainer exec opensuse.sif gcc --version
+```
+
+
+
+## To build container image from .def files
+
+
+```
+$ cd examples/1_buildcontainers
+
+# simpledocker.def
+$ apptainer build simpledocker.sif simpledocker.def
+
+# simplelocalimage
+$ apptainer pull --disable-cache docker://docker.io/opensuse/leap:15.5
+$ apptainer build simplelocalimage.sif simplelocalimage.def
+
+# simpleoras
+$ apptainer build simpleoras.sif simpleoras.def
+```
+
+## copy a file from filesystem into container image during build
+```
+$ cd examples/2_files
+# create a file named hello.c that prints hello world
+# then build the container
+$ apptainer build copyfile.sif copyfile.def
+```
+
+
+## Pushing a SIF file you create to a registry that supports OCI Registry As Storage (ORAS)
+
+SIF files are just files. So you can move them around just like an ordinary file.
+
+SIF files are not OCI images i.e. they are not structured the same as Docker and Podman images.
+So you can't push a SIF into an OCI registry as is. Some OCI registries support OCI Registry As 
+Storage (ORAS) which allow you to push and store arbitrary software artifacts in an OCI
+registry. You can use this to store a SIF file in a supported OCI registry like Dockerhub.
+
+First create an account on [Dockerhub](hub.docker.com).
+
+Then from the command line run the below command to establish a connection to Dockerhub
+
+```
+apptainer registry login --username <your username> oras://registry-1.docker.io
+Password/Token:
+```
+Now you can push your SIF file into the registry
+```
+apptainer push opensuse.sif oras://registry-1.docker.io/<your dockerhub username>/opensuse:latest
+```
+
+Now you can go to Dockerhub and check that your SIF file has been uploaded. You will see that
+it is labelled as an 'artifact'. Your user page can be reached at `hub.docker.com/u/<your username>`.
+
+To get this image, you can run the `apptainer pull` command like so:
+
+```
+apptainer pull opensuse.sif oras://docker.io/subilabrahamornl/opensuse:latest
+```
+
+Notice in the above that you are using `docker.io` instead of `registry-1.docker.io`. This 
+is an idiosyncracy of Dockerhub we have to live with for now.
+
+## Running your container in a job with Slurm
+```
+$ cd examples/3_simplejob
+$ apptainer build simpleoras.sif simpleoras.def
+```
+
+Edit the submit.sl file to use your project id and then submit the submit.sl file
+```
+$ sbatch submit.sl
+```
+
+## Running containerized applications that use MPI and GPU
+
+In order to let your application in your container use the MPI and GPU facilities
+provided by Frontier, we need to set some environment variables. We also need to make
+sure that we install a version of MPICH and ROCm inside the container that is 
+compatible with the versions on Frontier. MPICH 3.4.2 or 3.4.3 are ABI compatible
+with the Cray MPICH available on Frontier, so that is what is preferred you install
+in your container. And install whichever version of ROCm in the container image 
+that you plan to load as a module on Frontier.
+
+Clone the `olcf_container_examples` repository
+
+```
+git clone https://github.com/olcf/olcf_containers_examples
+cd olcf_container_examples/frontier/containers_on_frontier_docs/gpu_aware_mpi_example
+```
+
+
+Take a moment to examine the opensusempich342rocm571.def. You can build it with
+```
+apptainer build opensusempich342rocm571.sif opensusempich342rocm571.def
+```
+
+This build will take a while, so to save you some time copy the pre-built image
+```
+cp /lustre/orion/stf007/scratch/subil/containerstuff/apptainer/container_tests/frontier/containers/opensusempich342rocm571.sif .
+```
+
+Take a moment to inspect the `submit.sbatch` file and read explanations for why we
+are setting each of those environment variables. We have modules that will automatically 
+handle all of this (which we will cover in a later section), but if you want a better 
+understanding of what those modules are doing under the hood and why, this will explain it.
+
+Submit the `submit.sbatch` file. The output file will be in the `logs` directory in the
+current directory.
+
+(TODO: point to example here where user will build their own container with 
+osu benchmarks and run it).
+
+## Using the apptainer-enable-mpi and apptainer-enable-gpu modules
+
+On Frontier, You don't have have to manage all the environment variables and settings
+you encountered in the previous section. Frontier provides a few modules to make that
+easier. 
+
+To set up all the environment variables needed, you will load the following
+
+```
+module load olcf-container-tools
+module load apptainer-enable-mpi
+module load apptainer-enable-gpu
+```
+If you inspect modules with `module show <modulename>` you will see the environment
+variables being set up. You will notice that the environment variables use a prefix
+`APPTAINER_WRAPPER` instead of the normal `APPTAINER` or `APPTAINERENV` prefixes 
+we saw in the `submit.sbatch` in the previous section. The modules we loaded sets up an 
+apptainer wrapper (see 
+`/sw/frontier/olcf-container-tools/apptainer-wrappers/bin/bash/apptainer`) which will
+which will apend the `APPTAINER_WRAPPER*` environment variables to the correct
+`APPTAINER*` and `APPTAINERENV*` environment variables. This wrapper makes it so that
+you can define values for the `APPTAINER*` or `APPTAINERENV*` environment variables 
+with whatever you want e.g. you could set 
+
+```
+module load olcf-container-tools
+module load apptainer-enable-mpi
+module load apptainer-enable-gpu
+export APPTAINERENV_LD_LIBRARY_PATH=$HOME/mylibs
+apptainer exec mycontainersif.sif checkldlibs.sh
+```
+
+And the apptainer wrapper, when executed, will modify the `APPTAINERENV_LD_LIBRARY_PATH`
+to be `APPTAINERENV_LD_LIBRARY_PATH=$HOME/mylibs:$APPTAINER_WRAPPER_LD_LIBRARY_PATH` and
+then execute the actual apptainer executable with your arguments.
+
+
+(TODO: add exercise where user will do the above to check that their additions
+to apptainer envs are visible in the container)
+
+To see an example of this in use, go to `olcf_container_examples` repository
+you cloned in the previous section 
+
+```
+cd olcf_container_examples/frontier/containers_on_frontier_docs/apptainer_wrapper_lammps/gpu
+apptainer build lammps.sif lammps.def
+```
+
+`lammps.sif` pulls one of the OLCF base images (which we'll talk about in the next section)
+and builds a container with LAMMPS installed in it.
+
+Open the `submit.slurm` to see how we load the modules and run LAMMPS with the container.
+Try submitting the job and see it work.
+
+
+## OLCF provided base images
+
+OLCF provides a few base container images that aim to be compatible with specific Programming
+Environment (PE) versions provided by Cray on Frontier. The base image will have installed
+in it the compiler, the MPICH version, and ROCm version that matches those in
+the specified PE version. You can see the [Containers on Frontier docs section on
+base
+images](https://docs.olcf.ornl.gov/software/containers_on_frontier.html#olcf-base-images-apptainer-modules)
+for more information on what base images are available for which Cray PE
+version and what software is in those base images.
+
+We currently cannot provide any base images installed with the Cray clang compilers, or 
+other Cray software installed within the image. The base images will only have non Cray
+software. We can provide base images with GNU and AMD software that matches the versions
+in the PEs, but we cannot provide Cray's own proprietary software.
+
+You will remember that the LAMMPS container example from the previous section used
+one of the base images (check the `lammps.def` file). 
+
+(TODO: exercise for the user to build something themselves with their base image 
+of choice)
+
+## Multistage builds
+
+```
+cd examples/4_multistagebuild
+```
+
+(TODO: exercise where a user tries building a multistage example)
+ 
+
+
+
+
+
+
+
+
