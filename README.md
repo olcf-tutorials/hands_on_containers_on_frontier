@@ -241,11 +241,11 @@ Try submitting the job and see it work.
 
 ## OLCF provided base images
 
-OLCF provides a few base container images that aim to be compatible with specific Programming
-Environment (PE) versions provided by Cray on Frontier. The base image will have installed
-in it the compiler, the MPICH version, and ROCm version that matches those in
-the specified PE version. You can see the [Containers on Frontier docs section on
-base
+OLCF provides a few base container images that aim to be compatible with
+specific Programming Environment (PE) versions provided by Cray on Frontier.
+The base image will have installed in it the compiler, the MPICH version, and
+ROCm version that matches those in the specified PE version. You can see the
+[Containers on Frontier docs section on base
 images](https://docs.olcf.ornl.gov/software/containers_on_frontier.html#olcf-base-images-apptainer-modules)
 for more information on what base images are available for which Cray PE
 version and what software is in those base images.
@@ -263,8 +263,62 @@ of choice)
 
 ## Multistage builds
 
+An unfortunate aspect of containers sometimes is that since its an entire Linux distribution
+and then some, the container image files can get pretty big! For example, if you look at the
+container image you created in the previous section, it's around 4GB. For the most part, this
+isn't an issue. Each running container instance isn't resident in memory taking up 4GB at a 
+time. The only memory used is the memory used by the executable you are running from the container,
+same as if you were running natively. 
+
+(TODO: verify the above claim)
+
+However, if you still find yourself with a need to work with a smaller
+container image (say you have to upload it somewhere with size limits), you can
+go through and delete files you don't need by performing `rm` operations in the
+`%post` section of you .def file to reduce the final size of your container
+image. Or you can do a _multistage build_ where you build your executable in
+one stage with all the required development libraries, and then copy that
+executable into a smaller, more minimal container image that only has the
+required runtime libraries. The containers images that are created during the
+initial stages are deleted, and only the container image
+created in the last stage is kept. 
+
+There is no specific process to creating a runtime-only image, it all depends on
+your application. Only you know what runtime files your particular application
+needs that need to be copied into your final image. 
+
+Let's look at a couple of examples.
+
 ```
 cd examples/4_multistagebuild
+```
+
+The `lammps.def` file in this directory should look familiar. It's the image that we built
+in one of the earlier sections. Compare the `lammps.def` file with the `lammpsmultistagesimple.def`.
+In `lammpsmultistagesimple.def` we see how we have two "Stages", one named 'devel' and one named 
+'final'. The `'devel' stage is the same as what we saw before. The 'final' stage uses the same base
+image in the `From:` directive as the 'devel' stage, and then copies the `lmp` executable from the 
+'devel' stage to the 'final' stage. The container image created in the 'final' stage is what is 
+saved at the end of the build. The container image created in the 'devel' stage isn't saved.
+
+There's no big difference in size between the container images created from `lammps.def` and
+`lammpsmultistagesimple.def` because they both use the same base image which has the development
+and runtime libraries. 
+
+Now compare `lammpsmultistagesimple.def` and `lammpsmultistagefinal.def`. Here, in the 'final' stage we
+are using just `ubuntu:22.04` as our base which is a lot smaller in size than the OLCF base image.
+And because we don't have all the runtime libraries that we need in this ubuntu image, we have 
+to copy a bunch of them from the 'devel' stage into the 'final' stage to a location where your
+application (which you are also copying into the 'final' stage) can discover them at runtime.
+
+You will see that the container built by `lammpsmultistagefinal.def` is a lot smaller.
+
+If you go this route, there will be some trial and error involved when you identifying the runtime
+libraries that you need to copy between stages. But multistage builds are a useful tool to have
+in your back pocket should you ever need it.
+
+(TODO: check and see if the prgenvgnu version of your mpi test works with libquadmath
+from the host. The lammps example seems to require libquadmath from the container)
 ```
 
 (TODO: exercise where a user tries building a multistage example)
