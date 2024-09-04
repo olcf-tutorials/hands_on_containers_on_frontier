@@ -22,7 +22,8 @@ Don't forget the `docker://` prefix if pulling from some container registry
 apptainer pull opensuse.sif docker://opensuse/leap:15.4
 ```
 
-better practice is to use full url
+better practice is to use full url to indicate which registry you are getting
+the image from.
 
 ```
 apptainer pull opensuse.sif docker://docker.io/opensuse/leap:15.4
@@ -73,7 +74,6 @@ apptainer exec opensuse.sif gcc --version
 ```
 
 
-
 ## To build container image from .def files
 
 
@@ -92,6 +92,7 @@ $ apptainer build simpleoras.sif simpleoras.def
 ```
 
 ## copy a file from filesystem into container image during build
+
 ```
 $ cd examples/2_files
 # create a file named hello.c that prints hello world
@@ -99,6 +100,9 @@ $ cd examples/2_files
 $ apptainer build copyfile.sif copyfile.def
 ```
 
+**Pause for Exercise:** Navigate to `exercises/simpleimage` and complete the 
+exercise (TODO: check if the exercise is 
+set up to run correctly on Frontier)
 
 ## Pushing a SIF file you create to a registry that supports OCI Registry As Storage (ORAS)
 
@@ -181,8 +185,8 @@ understanding of what those modules are doing under the hood and why, this will 
 Submit the `submit.sbatch` file. The output file will be in the `logs` directory in the
 current directory.
 
-(TODO: point to example here where user will build their own container with 
-osu benchmarks and run it).
+**Pause for exercise:** Navigate to `exercises/mpigpuimage` and complete the exercise where you will build and 
+run a container with the OSU MPI microbenchmarks.
 
 ## Using the apptainer-enable-mpi and apptainer-enable-gpu modules
 
@@ -250,25 +254,29 @@ images](https://docs.olcf.ornl.gov/software/containers_on_frontier.html#olcf-bas
 for more information on what base images are available for which Cray PE
 version and what software is in those base images.
 
-We currently cannot provide any base images installed with the Cray clang compilers, or 
-other Cray software installed within the image. The base images will only have non Cray
-software. We can provide base images with GNU and AMD software that matches the versions
-in the PEs, but we cannot provide Cray's own proprietary software.
+We currently cannot provide any base images installed with the Cray clang
+compilers, or other Cray software installed within the image. The base images
+will only have non Cray software. We can provide base images with GNU and AMD
+software that matches the versions in the PEs, but we cannot provide Cray's own
+proprietary software.
 
 You will remember that the LAMMPS container example from the previous section used
 one of the base images (check the `lammps.def` file). 
 
 (TODO: exercise for the user to build something themselves with their base image 
 of choice)
+(TODO: create and validate this exercise. Make sure you have a working solution 
+as well)
 
 ## Multistage builds
 
-An unfortunate aspect of containers sometimes is that since its an entire Linux distribution
-and then some, the container image files can get pretty big! For example, if you look at the
-container image you created in the previous section, it's around 4GB. For the most part, this
-isn't an issue. Each running container instance isn't resident in memory taking up 4GB at a 
-time. The only memory used is the memory used by the executable you are running from the container,
-same as if you were running natively. 
+An unfortunate aspect of container images sometimes is that since its often an
+entire Linux distribution and then some, the container image files can get
+pretty big! For example, if you look at the container image you created in the
+previous section, it's around 4GB. For the most part, this isn't an issue. Each
+running container instance isn't resident in memory taking up 4GB at a time.
+The only memory used is the memory used by the executable you are running from
+the container, same as if you were running natively. 
 
 (TODO: verify the above claim)
 

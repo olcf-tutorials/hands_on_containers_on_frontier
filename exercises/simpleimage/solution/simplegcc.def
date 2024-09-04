@@ -5,6 +5,5 @@ From: simple.sif
 helloworld.c /
 
 %post
-zypper --gpg-auto-import-keys --non-interactive refresh
-zypper install -y gcc-c++
+apt-get install gcc
 gcc -o helloworld helloworld.c
