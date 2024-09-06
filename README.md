@@ -354,9 +354,9 @@ from `/lustre/orion/stf007/world-shared/subil/hands_on_containers_on_frontier_re
 
 # Resources
 
-Apptainer documentation: https://apptainer.org/docs/user/main/index.html
-Containers on Frontier documentation: https://docs.olcf.ornl.gov/software/containers_on_frontier.html
-Container examples: https://github.com/olcf/olcf_containers_examples/
+- Apptainer documentation: https://apptainer.org/docs/user/main/index.html
+- Containers on Frontier documentation: https://docs.olcf.ornl.gov/software/containers_on_frontier.html
+- Container examples: https://github.com/olcf/olcf_containers_examples/
 
 
 
