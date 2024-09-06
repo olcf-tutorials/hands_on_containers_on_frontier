@@ -1,0 +1,36 @@
+Bootstrap: oras
+From: savannah.ornl.gov/olcf-container-images/frontier/opensuse/gnu/cpe:23.12 
+Stage: devel
+
+%post
+
+zypper install -y curl
+echo "Compiling the MPI application..."
+curl -o osubenchmarks-7.2.tar.gz https://mvapich.cse.ohio-state.edu/download/mvapich/osu-micro-benchmarks-7.2.tar.gz && tar -xzf osubenchmarks-7.2.tar.gz --no-same-owner
+cd osu-micro-benchmarks-7.2 && ./configure CC=mpicc CXX=mpicc --enable-rocm --with-rocm=/opt/rocm && make  && rm ../osubenchmarks-7.2.tar.gz
+
+
+Bootstrap: docker
+From: opensuse/leap:15.5
+Stage: final
+
+%files from devel
+    /osu-micro-benchmarks-7.2/c/mpi/collective/blocking/osu_allgather /
+    /opt/mpich/3.4.3/lib/libmpicxx.so.12 /usr/lib64
+    /opt/mpich/3.4.3/lib/libmpi.so.12 /usr/lib64
+    /usr/lib64/libnuma.so.1 /usr/lib64
+    /opt/rocm/lib/libamdhip64.so.5 /usr/lib64
+    /opt/rocm/lib/libamd_comgr.so.2  /usr/lib64
+    /opt/rocm/lib/libhsa-runtime64.so.1 /usr/lib64
+    /opt/gcc/12.3.0/lib64/libstdc++.so.6 /usr/lib64
+    /opt/gcc/12.3.0/lib64/libgcc_s.so.1 /usr/lib64
+    /usr/lib64/libpciaccess.so.0 /usr/lib64
+     /opt/gcc/12.3.0/lib64/libatomic.so.1  /usr/lib64
+    /usr/lib64/libz.so.1 /usr/lib64
+    /usr/lib64/libzstd.so.1 /usr/lib64
+    /lib64/libtinfo.so.6 /usr/lib64
+     /usr/lib64/libdrm.so.2 /usr/lib64
+     /usr/lib64/libdrm_amdgpu.so.1 /usr/lib64
+    
+%post
+zypper install -y libquadmath0

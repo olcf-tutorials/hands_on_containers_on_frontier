@@ -91,18 +91,31 @@ $ apptainer build simplelocalimage.sif simplelocalimage.def
 $ apptainer build simpleoras.sif simpleoras.def
 ```
 
-## copy a file from filesystem into container image during build
+## copy a file from filesystem into container image during build, and setting environment variables in the container
 
 ```
 $ cd examples/2_files
 # create a file named hello.c that prints hello world
 # then build the container
+
 $ apptainer build copyfile.sif copyfile.def
 ```
 
-**Pause for Exercise:** Navigate to `exercises/simpleimage` and complete the 
-exercise (TODO: check if the exercise is 
-set up to run correctly on Frontier)
+You will see in the `copyfile.def` there are sections `%files` and `%environment`.
+The `%files` section let you copy a file from the host filesystem into the container,
+and `%environment` let you set environment variables that will be active during the 
+container run (provided you don't override them when you launch your container). 
+
+In this example, we are updating the PATH in the container to include `/mybin` which
+is also where we are putting our hello world program. So we can execute this program
+without needing the full file path.
+
+```
+$ apptainer exec copyfile.sif hello
+```
+
+**Pause for Exercise:** Navigate to `exercises/1_simpleimage` and complete the 
+exercise
 
 ## Pushing a SIF file you create to a registry that supports OCI Registry As Storage (ORAS)
 
@@ -138,6 +151,9 @@ apptainer pull opensuse.sif oras://docker.io/subilabrahamornl/opensuse:latest
 Notice in the above that you are using `docker.io` instead of `registry-1.docker.io`. This 
 is an idiosyncracy of Dockerhub we have to live with for now.
 
+There are other registries that support ORAS. See here: https://oras.land/adopters/
+
+
 ## Running your container in a job with Slurm
 ```
 $ cd examples/3_simplejob
@@ -172,9 +188,9 @@ Take a moment to examine the opensusempich342rocm571.def. You can build it with
 apptainer build opensusempich342rocm571.sif opensusempich342rocm571.def
 ```
 
-This build will take a while, so to save you some time copy the pre-built image
+This build will take a while, so to save you some time just copy the pre-built image
 ```
-cp /lustre/orion/stf007/scratch/subil/containerstuff/apptainer/container_tests/frontier/containers/opensusempich342rocm571.sif .
+cp /lustre/orion/stf007/world-shared/subil/hands_on_containers_on_frontier_resources/opensusempich342rocm571.sif .
 ```
 
 Take a moment to inspect the `submit.sbatch` file and read explanations for why we
@@ -185,8 +201,6 @@ understanding of what those modules are doing under the hood and why, this will 
 Submit the `submit.sbatch` file. The output file will be in the `logs` directory in the
 current directory.
 
-**Pause for exercise:** Navigate to `exercises/mpigpuimage` and complete the exercise where you will build and 
-run a container with the OSU MPI microbenchmarks.
 
 ## Using the apptainer-enable-mpi and apptainer-enable-gpu modules
 
@@ -207,7 +221,7 @@ variables being set up. You will notice that the environment variables use a pre
 we saw in the `submit.sbatch` in the previous section. The modules we loaded sets up an 
 apptainer wrapper (see 
 `/sw/frontier/olcf-container-tools/apptainer-wrappers/bin/bash/apptainer`) which will
-which will apend the `APPTAINER_WRAPPER*` environment variables to the correct
+which will append the `APPTAINER_WRAPPER*` environment variables to the correct
 `APPTAINER*` and `APPTAINERENV*` environment variables. This wrapper makes it so that
 you can define values for the `APPTAINER*` or `APPTAINERENV*` environment variables 
 with whatever you want e.g. you could set 
@@ -224,11 +238,7 @@ And the apptainer wrapper, when executed, will modify the `APPTAINERENV_LD_LIBRA
 to be `APPTAINERENV_LD_LIBRARY_PATH=$HOME/mylibs:$APPTAINER_WRAPPER_LD_LIBRARY_PATH` and
 then execute the actual apptainer executable with your arguments.
 
-
-(TODO: add exercise where user will do the above to check that their additions
-to apptainer envs are visible in the container)
-
-To see an example of this in use, go to `olcf_container_examples` repository
+To see an example of the modules in use, go to `olcf_container_examples` repository
 you cloned in the previous section 
 
 ```
@@ -242,11 +252,13 @@ and builds a container with LAMMPS installed in it.
 Open the `submit.slurm` to see how we load the modules and run LAMMPS with the container.
 Try submitting the job and see it work.
 
+**Pause for Exercise:** Navigate to `exercises/2_apptainermodule` and complete the exercise
+
 
 ## OLCF provided base images
 
 OLCF provides a few base container images that aim to be compatible with
-specific Programming Environment (PE) versions provided by Cray on Frontier.
+specific Programming Environment (PE) versions provided by HPE on Frontier.
 The base image will have installed in it the compiler, the MPICH version, and
 ROCm version that matches those in the specified PE version. You can see the
 [Containers on Frontier docs section on base
@@ -254,19 +266,23 @@ images](https://docs.olcf.ornl.gov/software/containers_on_frontier.html#olcf-bas
 for more information on what base images are available for which Cray PE
 version and what software is in those base images.
 
-We currently cannot provide any base images installed with the Cray clang
+If you are building and running an MPI+GPU application, it is HIGHLY recommended you
+use one of the OLCF base images as your base.
+
+**We currently cannot provide any base images installed with the Cray Clang
 compilers, or other Cray software installed within the image. The base images
 will only have non Cray software. We can provide base images with GNU and AMD
-software that matches the versions in the PEs, but we cannot provide Cray's own
-proprietary software.
+software that matches the versions in the GNU and AMD PEs provided in Frontier
+, but we cannot provide Cray's own
+proprietary software.**
 
 You will remember that the LAMMPS container example from the previous section used
 one of the base images (check the `lammps.def` file). 
 
-(TODO: exercise for the user to build something themselves with their base image 
-of choice)
-(TODO: create and validate this exercise. Make sure you have a working solution 
-as well)
+
+**Pause for exercise:** Navigate to `exercises/3_mpigpuimage` and complete the
+exercise where you will build and run a container with the OSU MPI
+microbenchmarks.
 
 ## Multistage builds
 
@@ -295,7 +311,7 @@ There is no specific process to creating a runtime-only image, it all depends on
 your application. Only you know what runtime files your particular application
 needs that need to be copied into your final image. 
 
-Let's look at a couple of examples.
+Let's look at an example.
 
 ```
 cd examples/4_multistagebuild
@@ -313,28 +329,34 @@ There's no big difference in size between the container images created from `lam
 `lammpsmultistagesimple.def` because they both use the same base image which has the development
 and runtime libraries. 
 
-Now compare `lammpsmultistagesimple.def` and `lammpsmultistagefinal.def`. Here, in the 'final' stage we
+Now compare `lammpsmultistagesimple.def` and `lammpsmultistagecomplex.def`. Here, in the 'final' stage we
 are using just `ubuntu:22.04` as our base which is a lot smaller in size than the OLCF base image.
 And because we don't have all the runtime libraries that we need in this ubuntu image, we have 
 to copy a bunch of them from the 'devel' stage into the 'final' stage to a location where your
 application (which you are also copying into the 'final' stage) can discover them at runtime.
 
-You will see that the container built by `lammpsmultistagefinal.def` is a lot smaller.
+You will see that the container built by `lammpsmultistagecomplex.def` is a lot smaller.
 
 If you go this route, there will be some trial and error involved when you identifying the runtime
 libraries that you need to copy between stages. But multistage builds are a useful tool to have
 in your back pocket should you ever need it.
 
-(TODO: check and see if the prgenvgnu version of your mpi test works with libquadmath
-from the host. The lammps example seems to require libquadmath from the container)
-```
+(To save you some time, copy the `lammps.sif lammpsmultistagesimple.sif lammpsmultistagecomplex.sif`
+from `/lustre/orion/stf007/world-shared/subil/hands_on_containers_on_frontier_resources`)
 
-(TODO: exercise where a user tries building a multistage example)
+
+
+**Pause for Exercise:** Navigate to `exercises/4_stagedbuilds` and complete the exercise.
  
 
 
 
 
+# Resources
+
+Apptainer documentation: https://apptainer.org/docs/user/main/index.html
+Containers on Frontier documentation: https://docs.olcf.ornl.gov/software/containers_on_frontier.html
+Container examples: https://github.com/olcf/olcf_containers_examples/
 
 
 

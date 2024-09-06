@@ -4,7 +4,7 @@
 #SBATCH -J lammps_container_gpu
 #SBATCH -o %j.out
 #SBATCH -N 2
-#SBATCH -t 00:30:00
+#SBATCH -t 00:40:00
 
 module reset
 module load PrgEnv-gnu

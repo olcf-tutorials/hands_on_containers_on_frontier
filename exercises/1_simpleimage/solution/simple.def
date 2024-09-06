@@ -1,0 +1,9 @@
+Bootstrap: docker
+From: ubuntu:22.04
+
+%files
+
+
+%post
+apt-get update -y
+apt-get install -y gcc-11

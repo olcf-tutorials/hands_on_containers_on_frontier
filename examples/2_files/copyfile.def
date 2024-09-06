@@ -1,8 +1,14 @@
 Bootstrap: docker
 From: opensuse/leap:15.4
 
+%environment
+export PATH=/mybin:$PATH
+
 %files
 ./hello.c /hello.c
 
 %post
-gcc -o hello hello.c
+zypper --non-interactive ref
+zypper install -y gcc
+mkdir /mybin
+gcc -o /mybin/hello hello.c

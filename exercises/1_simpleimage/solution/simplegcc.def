@@ -5,5 +5,4 @@ From: simple.sif
 helloworld.c /
 
 %post
-apt-get install gcc
-gcc -o helloworld helloworld.c
+gcc-11 -o helloworld helloworld.c

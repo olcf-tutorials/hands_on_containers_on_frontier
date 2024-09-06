@@ -1,0 +1,6 @@
+Bootstrap:
+From: 
+
+%files
+
+%post
