@@ -1,4 +1,5 @@
-This repository is to accompany the Container training conducted at the 2024 OLCF User Meeting
+This repository is to accompany the Container training conducted at the 2024 OLCF User Meeting. 
+This tutorial is mostly standalone, and the information is current as of Sep 6 2024.
 
 # Follow along
 
