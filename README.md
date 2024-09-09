@@ -28,7 +28,7 @@ Don't forget the `docker://` prefix if pulling from some container registry
 apptainer pull opensuse.sif docker://opensuse/leap:15.4
 ```
 
-better practice is to use full url to indicate which registry you are getting
+Better practice is to use full url to indicate which registry you are getting
 the image from.
 
 ```
