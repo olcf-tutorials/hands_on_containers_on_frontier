@@ -1,15 +1,20 @@
 This repository is to accompany the Container training conducted at the 2024 OLCF User Meeting. 
-This tutorial is mostly standalone, and the information is current as of Sep 6 2024.
+This tutorial is mostly standalone, and the information is current as of Sep 6 2024
 
 # Follow along
 
-NOTE: if you find yourself encountering an error that looks like the below
+## NOTE
+If you find yourself encountering an error that looks like the below
 when you execute `apptainer pull` or `apptainer build`, then try using the flag
 `--disable-cache` i.e. `apptainer pull --disable-cache`. 
 
 ```
 FATAL:   While performing build: conveyor failed to get: while fetching library image: cached file hash(sha256:74b3763bbffd3cbaa355240994d684318fe64087fd1f70bdd8eaa6c64072683b) and expected hash(sha256:4fa8838b548fe90a161541ba06777ca32ed235666b0f55d7df34150dbd11c237) does not match
 ```
+
+If you encounter an error that says something along the lines of 'disk quota exceeded', 
+that likely means you run out of space in your home directory. You can delete `~/.apptainer/cache` to 
+remove the cached stuff from Apptainer.
 
 Now onto the tutorial!
 
@@ -77,7 +82,6 @@ apptainer exec opensuse.sif gcc --version
 
 ## To build container image from .def files
 
-
 ```
 $ cd examples/1_buildcontainers
 
@@ -92,7 +96,8 @@ $ apptainer build simplelocalimage.sif simplelocalimage.def
 $ apptainer build simpleoras.sif simpleoras.def
 ```
 
-## copy a file from filesystem into container image during build, and setting environment variables in the container
+
+## Copy a file from filesystem into container image during build, and setting environment variables in the container
 
 ```
 $ cd examples/2_files
@@ -113,6 +118,8 @@ without needing the full file path.
 
 ```
 $ apptainer exec copyfile.sif hello
+$ apptainer shell copyfile.sif
+Apptainer> echo $PATH
 ```
 
 **Pause for Exercise:** Navigate to `exercises/1_simpleimage` and complete the 
@@ -128,8 +135,11 @@ Storage (ORAS) which allow you to push and store arbitrary software artifacts in
 registry. You can use this to store a SIF file in a supported OCI registry like Dockerhub.
 
 First create an account on [Dockerhub](hub.docker.com).
+Then go to Account Settings -> Personal Access Token -> Generate New Token.
+Copy the token (you will not be able to copy it later).
 
-Then from the command line run the below command to establish a connection to Dockerhub
+Then from the command line run the below command to establish a connection to Dockerhub.
+Paste the token you just copied when prompted.
 
 ```
 apptainer registry login --username <your username> oras://registry-1.docker.io
@@ -290,12 +300,11 @@ microbenchmarks.
 An unfortunate aspect of container images sometimes is that since its often an
 entire Linux distribution and then some, the container image files can get
 pretty big! For example, if you look at the container image you created in the
-previous section, it's around 4GB. For the most part, this isn't an issue. Each
+previous section, it's around 4GB. The base images are big to provide everything 
+you need to build and run. For the most part, this isn't an issue. Each
 running container instance isn't resident in memory taking up 4GB at a time.
 The only memory used is the memory used by the executable you are running from
 the container, same as if you were running natively. 
-
-(TODO: verify the above claim)
 
 However, if you still find yourself with a need to work with a smaller
 container image (say you have to upload it somewhere with size limits), you can
@@ -339,7 +348,8 @@ application (which you are also copying into the 'final' stage) can discover the
 You will see that the container built by `lammpsmultistagecomplex.def` is a lot smaller.
 
 If you go this route, there will be some trial and error involved when you identifying the runtime
-libraries that you need to copy between stages. But multistage builds are a useful tool to have
+libraries that you need to copy between stages. So use the bigger images as is since it is much more 
+convenient. But multistage builds are a useful tool to have
 in your back pocket should you ever need it.
 
 (To save you some time, copy the `lammps.sif lammpsmultistagesimple.sif lammpsmultistagecomplex.sif`
@@ -358,6 +368,7 @@ from `/lustre/orion/stf007/world-shared/subil/hands_on_containers_on_frontier_re
 - Apptainer documentation: https://apptainer.org/docs/user/main/index.html
 - Containers on Frontier documentation: https://docs.olcf.ornl.gov/software/containers_on_frontier.html
 - Container examples: https://github.com/olcf/olcf_containers_examples/
+- Questions/Support when using containers on Frontier - help@olcf.ornl.gov
 
 
 
