@@ -242,15 +242,15 @@ module load olcf-container-tools
 module load apptainer-enable-mpi
 module load apptainer-enable-gpu
 export APPTAINERENV_LD_LIBRARY_PATH=$HOME/mylibs
-apptainer exec mycontainersif.sif checkldlibs.sh
+apptainer exec mycontainersif.sif /checkldlibs.sh
 ```
 
 And the apptainer wrapper, when executed, will modify the `APPTAINERENV_LD_LIBRARY_PATH`
 to be `APPTAINERENV_LD_LIBRARY_PATH=$HOME/mylibs:$APPTAINER_WRAPPER_LD_LIBRARY_PATH` and
 then execute the actual apptainer executable with your arguments.
 
-To see an example of the modules in use, go to `olcf_container_examples` repository
-you cloned in the previous section 
+To see an example of the modules in use, go to `olcf_container_examples`
+repository you cloned in the previous section 
 
 ```
 cd olcf_container_examples/frontier/containers_on_frontier_docs/apptainer_wrapper_lammps/gpu
@@ -260,8 +260,11 @@ apptainer build lammps.sif lammps.def
 `lammps.sif` pulls one of the OLCF base images (which we'll talk about in the next section)
 and builds a container with LAMMPS installed in it.
 
-Open the `submit.slurm` to see how we load the modules and run LAMMPS with the container.
-Try submitting the job and see it work.
+(To save you some time, copy the `lammps.sif` from
+`/lustre/orion/stf007/world-shared/subil/hands_on_containers_on_frontier_resources`).
+
+Open the `submit.slurm` to see how we load the modules and run LAMMPS with the
+container.  Try submitting the job and see it work.
 
 **Pause for Exercise:** Navigate to `exercises/2_apptainermodule` and complete the exercise
 
