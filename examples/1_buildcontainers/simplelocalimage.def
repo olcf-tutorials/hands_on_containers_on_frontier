@@ -1,5 +1,5 @@
 Bootstrap: localimage
-From: opensuseleap.sif
+From: opensuse.sif
 
 %post
 zypper --non-interactive --gpg-auto-import-keys refresh

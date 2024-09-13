@@ -89,7 +89,7 @@ $ cd examples/1_buildcontainers
 $ apptainer build simpledocker.sif simpledocker.def
 
 # simplelocalimage
-$ apptainer pull --disable-cache docker://docker.io/opensuse/leap:15.5
+$ apptainer pull --disable-cache opensuse.sif docker://docker.io/opensuse/leap:15.5
 $ apptainer build simplelocalimage.sif simplelocalimage.def
 
 # simpleoras
@@ -265,6 +265,19 @@ and builds a container with LAMMPS installed in it.
 
 Open the `submit.slurm` to see how we load the modules and run LAMMPS with the
 container.  Try submitting the job and see it work.
+
+**NOTE**: Make sure you load the container modules only for running the
+container. They should not be loaded during build. This is because
+`APPTAINER_BINDPATH` environment variable which is set by one of the modules is
+read by the `apptainer build` command, and will cause the build to fail with an
+error message like
+```
+FATAL:   container creation failed: mount hook function failure: mount /opt/cray->/opt/cray error: while mounting /opt/cray: destination /opt/cray doesn't exist in container
+```
+`apptainer exec` is able to automatically create directories in the container
+to mount the host directories listed in `APPTAINER_BINDPATH`, but that is not
+done during `apptainer build` hence error.
+
 
 **Pause for Exercise:** Navigate to `exercises/2_apptainermodule` and complete the exercise
 
