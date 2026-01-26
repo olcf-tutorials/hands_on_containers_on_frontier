@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#SBATCH -A  stf007uanofn
+#SBATCH -A gen107
 #SBATCH -J lammps_container_gpu
 #SBATCH -o %j.out
 #SBATCH -N 2

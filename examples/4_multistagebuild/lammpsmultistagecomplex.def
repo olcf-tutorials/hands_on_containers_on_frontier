@@ -1,5 +1,5 @@
-Bootstrap: oras
-From: savannah.ornl.gov/olcf-container-images/frontier/ubuntu/gnu/cpe:23.12
+Bootstrap: docker 
+From: savannah.ornl.gov/olcf-container-images/cpe:24.11_gnu_ubuntu # this could be the ubuntu, opensuse or rockylinux container
 Stage: devel
 
 %post
@@ -14,26 +14,37 @@ Stage: devel
     export PATH="/opt/lammps/bin:$PATH"
 
 Bootstrap: docker
-From: ubuntu:22.04
+From: ubuntu:24.04
 Stage: final
 
 %files from devel
-    /opt/lammps/bin/lmp /usr/bin
+    /lib/x86_64-linux-gnu/libc.so.6 /lib/x86_64-linux-gnu
+    /lib/x86_64-linux-gnu/libdrm_amdgpu.so.1 /lib/x86_64-linux-gnu
+    /lib/x86_64-linux-gnu/libdrm.so.2 /lib/x86_64-linux-gnu
+    /lib/x86_64-linux-gnu/libelf.so.1 /lib/x86_64-linux-gnu
+    /lib/x86_64-linux-gnu/libm.so.6 /lib/x86_64-linux-gnu
+    /lib/x86_64-linux-gnu/libnuma.so.1 /lib/x86_64-linux-gnu
+    /lib/x86_64-linux-gnu/libpciaccess.so.0 /lib/x86_64-linux-gnu
+    /lib/x86_64-linux-gnu/libquadmath.so.0.0.0 /lib/x86_64-linux-gnu/libquadmath.so.0
+    /lib/x86_64-linux-gnu/libtinfo.so.6 /lib/x86_64-linux-gnu
+    /lib/x86_64-linux-gnu/libz.so.1 /lib/x86_64-linux-gnu
+    /lib/x86_64-linux-gnu/libxml2.so.2 /lib/x86_64-linux-gnu
+    /lib/x86_64-linux-gnu/libicuuc.so.74 /lib/x86_64-linux-gnu
+    /lib/x86_64-linux-gnu/libicudata.so.74 /lib/x86_64-linux-gnu
+
+    /opt/gcc/13.2.0/lib64/libatomic.so.1 /lib/x86_64-linux-gnu
+    /opt/gcc/13.2.0/lib64/libgcc_s.so.1 /lib/x86_64-linux-gnu
+    /opt/gcc/13.2.0/lib64/libstdc++.so.6  /lib/x86_64-linux-gnu
+
     /opt/mpich/3.4.3/lib/libmpicxx.so.12 /lib/x86_64-linux-gnu
     /opt/mpich/3.4.3/lib/libmpi.so.12 /lib/x86_64-linux-gnu
-    /lib/x86_64-linux-gnu/libm.so.6 /lib/x86_64-linux-gnu
-    /opt/rocm-5.7.1/lib/libamdhip64.so.5 /lib/x86_64-linux-gnu 
-    /opt/gcc/12.3.0/lib64/libstdc++.so.6  /lib/x86_64-linux-gnu
-    /opt/gcc/12.3.0/lib64/libgcc_s.so.1 /lib/x86_64-linux-gnu
-    /lib/x86_64-linux-gnu/libc.so.6 /lib/x86_64-linux-gnu
-    /lib/x86_64-linux-gnu/libpciaccess.so.0 /lib/x86_64-linux-gnu
-    /opt/gcc/12.3.0/lib64/libatomic.so.1 /lib/x86_64-linux-gnu
-    /opt/rocm-5.7.1/lib/libamd_comgr.so.2 /lib/x86_64-linux-gnu
-    /opt/rocm-5.7.1/lib/libhsa-runtime64.so.1 /lib/x86_64-linux-gnu
-    /lib/x86_64-linux-gnu/libnuma.so.1 /lib/x86_64-linux-gnu
-    /lib/x86_64-linux-gnu/libz.so.1 /lib/x86_64-linux-gnu
-    /lib/x86_64-linux-gnu/libtinfo.so.6 /lib/x86_64-linux-gnu
-    /lib/x86_64-linux-gnu/libelf.so.1 /lib/x86_64-linux-gnu
-    /lib/x86_64-linux-gnu/libdrm.so.2 /lib/x86_64-linux-gnu
-    /lib/x86_64-linux-gnu/libdrm_amdgpu.so.1 /lib/x86_64-linux-gnu
-    /lib/x86_64-linux-gnu/libquadmath.so.0.0.0 /lib/x86_64-linux-gnu/libquadmath.so.0
+
+    /opt/rocm-6.2.4/lib/libamd_comgr.so.2 /lib/x86_64-linux-gnu
+    /opt/rocm-6.2.4/lib/libamdhip64.so.6 /lib/x86_64-linux-gnu 
+    /opt/rocm-6.2.4/lib/libhsa-runtime64.so.1 /lib/x86_64-linux-gnu
+    /opt/rocm-6.2.4/lib/librocprofiler-register.so.0 /lib/x86_64-linux-gnu 
+    /opt/rocm/lib/llvm/lib/libomp.so /lib/x86_64-linux-gnu 
+
+    /opt/amdgpu/share/libdrm/amdgpu.ids /opt/amdgpu/share/libdrm/amdgpu.ids
+
+    /opt/lammps/bin/lmp /usr/bin

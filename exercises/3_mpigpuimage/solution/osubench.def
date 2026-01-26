@@ -1,12 +1,13 @@
-Bootstrap: oras
-From: savannah.ornl.gov/olcf-container-images/frontier/opensuse/gnu/cpe:23.12 
+Bootstrap: docker 
+From: savannah.ornl.gov/olcf-container-images/cpe:25.03_gnu_ubuntu
 
 %post
 
-zypper install -y curl
+
 echo "Compiling the MPI application..."
-curl -o osubenchmarks-7.2.tar.gz https://mvapich.cse.ohio-state.edu/download/mvapich/osu-micro-benchmarks-7.2.tar.gz && tar -xzf osubenchmarks-7.2.tar.gz --no-same-owner
-cd osu-micro-benchmarks-7.2 && ./configure CC=mpicc CXX=mpicc --enable-rocm --with-rocm=/opt/rocm && make  && rm ../osubenchmarks-7.2.tar.gz
+apt-get install -y curl
+curl -o osubenchmarks-7.5.2.tar.gz  https://mvapich.cse.ohio-state.edu/download/mvapich/osu-micro-benchmarks-7.5.2.tar.gz  && tar -xzf osubenchmarks-7.5.2.tar.gz --no-same-owner
+cd osu-micro-benchmarks-7.5.2 && ./configure CC=mpicc CXX=mpicc --enable-rocm --with-rocm=/opt/rocm && make  && rm ../osubenchmarks-7.5.2.tar.gz
 
 
 

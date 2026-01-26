@@ -1,5 +1,5 @@
-Bootstrap: oras
-From: savannah.ornl.gov/olcf-container-images/frontier/ubuntu/gnu/cpe:23.12
+Bootstrap: docker 
+From: savannah.ornl.gov/olcf-container-images/cpe:24.11_gnu_ubuntu # this could be the ubuntu, opensuse or rockylinux container
 Stage: devel
 
 %post
@@ -13,9 +13,12 @@ Stage: devel
 %environment
     export PATH="/opt/lammps/bin:$PATH"
 
-Bootstrap: oras
-From: savannah.ornl.gov/olcf-container-images/frontier/ubuntu/gnu/cpe:23.12
+Bootstrap: docker 
+From: savannah.ornl.gov/olcf-container-images/cpe:24.11_gnu_ubuntu # this could be the ubuntu, opensuse or rockylinux container
 Stage: final
 
 %files from devel
     /opt/lammps/bin/lmp /usr/bin
+
+%environment
+    export LD_LIBRARY_PATH="/opt/rocm/lib/llvm/lib:$LD_LIBRARY_PATH"

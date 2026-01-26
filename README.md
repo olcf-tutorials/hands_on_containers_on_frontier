@@ -178,13 +178,14 @@ $ sbatch submit.sl
 
 ## Running containerized applications that use MPI and GPU
 
-In order to let your application in your container use the MPI and GPU facilities
-provided by Frontier, we need to set some environment variables. We also need to make
-sure that we install a version of MPICH and ROCm inside the container that is 
-compatible with the versions on Frontier. MPICH 3.4.2 or 3.4.3 are ABI compatible
-with the Cray MPICH available on Frontier, so that is what is preferred you install
-in your container. And install whichever version of ROCm in the container image 
-that you plan to load as a module on Frontier.
+In order to let your application in your container use the MPI and GPU
+facilities provided by Frontier, we need to set some environment variables. We
+also need to make sure that we install a version of MPICH and ROCm inside the
+container that is compatible with the versions on Frontier. MPICH 3.4.2 or
+3.4.3 are ABI compatible with the Cray MPICH 8.x available on Frontier (or
+4.1.2 if you are using Cray MPICH 9.x), so that is what is preferred you
+install in your container. And install whichever version of ROCm in the
+container image that you plan to load as a module on Frontier.
 
 Clone the `olcf_container_examples` repository
 
@@ -194,14 +195,14 @@ cd olcf_container_examples/frontier/containers_on_frontier_docs/gpu_aware_mpi_ex
 ```
 
 
-Take a moment to examine the opensusempich342rocm571.def. You can build it with
+Take a moment to examine the opensusempich342rocm624.def. You can build it with
 ```
-apptainer build opensusempich342rocm571.sif opensusempich342rocm571.def
+apptainer build opensusempich342rocm624.sif opensusempich342rocm624.def
 ```
 
 This build will take a while, so to save you some time just copy the pre-built image
 ```
-cp /lustre/orion/stf007/world-shared/subil/hands_on_containers_on_frontier_resources/opensusempich342rocm571.sif .
+cp /lustre/orion/stf007/world-shared/subil/hands_on_containers_on_frontier_resources/opensusempich342rocm624.sif .
 ```
 
 Take a moment to inspect the `submit.sbatch` file and read explanations for why we
@@ -226,6 +227,7 @@ module load olcf-container-tools
 module load apptainer-enable-mpi
 module load apptainer-enable-gpu
 ```
+
 If you inspect modules with `module show <modulename>` you will see the environment
 variables being set up. You will notice that the environment variables use a prefix
 `APPTAINER_WRAPPER` instead of the normal `APPTAINER` or `APPTAINERENV` prefixes 
