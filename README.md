@@ -439,6 +439,32 @@ and the `TF_CONFIG` configuration is defined within the `submit.sbatch` script w
 **Pause for exercise:** Navigate to `exercises/5_amddockerhubai` and complete the
 exercise where you will build an AMD Jax container and use it in running a Gaussian process regression. 
 
+## PyTorch Exercise
+Containers via Apptainer can also be used to aid you in building and deploying PyTorch applications across Frontier.
+AMD has conveniently provided a pre-built PyTorch image under AMD's ROCm registry, which helps to provide more immediate compatibility with AMD GPUs and potentially less setup than creating a Conda environment.
+AMD provides various version combinations of ROCm + PyTorch that you can select based on your needs.
+You can pull these images directly or use them as a base to build your own environment with additional dependencies using familiar syntax like `pip install` or `apt install`.
+
+**Pause for Exercise:** Navigate to `exercises/6_pytorch_benchmark` and complete the exercise to see an example of how simple it can be to run PyTorch on Frontier!
+
+In this exercise your goal is to use what you've learned to grab the image from AMD's registry and find the right Apptainer commands to run it!
+
+## vLLM Example
+On the other side of AI, we have inferencing.
+This is where we use the trained model from the deep learning frameworks like PyTorch and actually use them.
+vLLM is an example inferencing application we can use to run trained models on containers on Frontier.
+AMD also provides a few vLLM images on the ROCm registry!
+
+You can check out some examples OLCF has at https://github.com/olcf/olcf_containers_examples/tree/main/frontier/sample_apps/vllm and https://github.com/olcf/olcf_containers_examples/tree/main/frontier/sample_apps/vllm_singlenode
+
+Let's look at an example that has been modified from the above examples to be easier to follow in this hands-on:
+
+```
+cd examples/5_ai_inferencing
+```
+
+If you want to continue playing around with the example, you can modify the code in `testprompt.py` to give different prompts to the service!
+
 
 ## Running on Multiple Systems
 
@@ -478,33 +504,6 @@ velocity build mpich libfabric ucx gcc@0 cxi@12 -n mpich
 Next we need to build LAMMPS. The script to do this can be found in `examples/6_multiple_systems/`.
 Then you can use the provided submit scripts to run the same container on
 Frontier and Andes (be sure to set your account properly in the batch scripts).
-
-## PyTorch Exercise
-Containers via Apptainer can also be used to aid you in building and deploying PyTorch applications across Frontier.
-AMD has conveniently provided a pre-built PyTorch image under AMD's ROCm registry, which helps to provide more immediate compatibility with AMD GPUs and potentially less setup than creating a Conda environment.
-AMD provides various version combinations of ROCm + PyTorch that you can select based on your needs.
-You can pull these images directly or use them as a base to build your own environment with additional dependencies using familiar syntax like `pip install` or `apt install`.
-
-**Pause for Exercise:** Navigate to `exercises/6_pytorch_benchmark` and complete the exercise to see an example of how simple it can be to run PyTorch on Frontier!
-
-In this exercise your goal is to use what you've learned to grab the image from AMD's registry and find the right Apptainer commands to run it!
-
-## vLLM Example
-On the other side of AI, we have inferencing.
-This is where we use the trained model from the deep learning frameworks like PyTorch and actually use them.
-vLLM is an example inferencing application we can use to run trained models on containers on Frontier.
-AMD also provides a few vLLM images on the ROCm registry!
-
-You can check out some examples OLCF has at https://github.com/olcf/olcf_containers_examples/tree/main/frontier/sample_apps/vllm and https://github.com/olcf/olcf_containers_examples/tree/main/frontier/sample_apps/vllm_singlenode
-
-Let's look at an example that has been modified from the above examples to be easier to follow in this hands-on:
-
-```
-cd examples/5_ai_inferencing
-```
-
-If you want to continue playing around with the example, you can modify the code in `testprompt.py` to give different prompts to the service!
-
 
 # Resources
 
