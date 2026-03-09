@@ -1,0 +1,20 @@
+Bootstrap: localimage
+From: mpich.sif
+
+%post
+apt -y install cmake
+
+wget https://github.com/lammps/lammps/releases/download/stable_22Jul2025_update3/lammps-src-22Jul2025_update3.tar.gz
+tar -xzf lammps-src-22Jul2025_update3.tar.gz
+
+cmake \
+    -S /lammps-22Jul2025/cmake \
+    -B /build \
+    -D CMAKE_INSTALL_PREFIX="/opt/lammps" \
+    -D CMAKE_C_COMPILER=mpicc \
+    -D CMAKE_CXX_COMPILER=mpicxx \
+    -D PKG_KOKKOS=ON \
+    -D Kokkos_ARCH_ZEN2=ON \
+    -D Kokkos_ENABLE_OPENMP=ON \
+
+cmake --build /build --target install -j4

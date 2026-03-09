@@ -378,35 +378,107 @@ from `/lustre/orion/stf007/world-shared/subil/hands_on_containers_on_frontier_re
 **Pause for Exercise:** Navigate to `exercises/4_stagedbuilds` and complete the exercise.
  
 
-## AI in Containers
-### PyTorch
-Containers via Apptainer can also be used to aid you in building and deploying Python environments across Frontier.
-There are pre-built images available that can give you a starting point in your environment setup.
-One helpful example is PyTorch, a popular framework for deep learning in Python.
+## Running AMD Dockerhub AI/ML containers on Frontier
 
-AMD has conveniently provided a pre-built PyTorch image under AMD's ROCm registry, which helps to provide more immediate compatibility with AMD GPUs and potentially less setup than creating a Conda environment.
-They provide various version combinations of ROCm + PyTorch that you can select based on your needs.
-You can pull these images directly or use them as a base to build your own environment with additional dependencies using familiar syntax like `pip install` or `apt install`.
+For some applications, building the container from scratch can be cumbersome and time consuming. 
+For others that also rely on optimized rocm libraries for peak performance, 
+it is worth building on already existing images that contain these optimized libraries. 
 
-**Pause for Exercise:** Navigate to `exercises/6_pytorch_benchmark` and complete the exercise to see an example of how simple it can be to run PyTorch on Frontier!
+AMD has therefore made available on its [DockerHub](https://hub.docker.com/u/rocm) repository, 
+container images that have rocm libraries built-in and optimized for AMD Architectures. 
+In this section, we walk through the steps to access, build, customize and run AMD optimized container images on Frontier. 
 
-In this exercise your main goal is to use what you've learned to grab the image from AMD's registry and find the right Apptainer commands to run it!
+We focus on AI applications since these have a wider user base and usage on Frontier. 
+Specifically, we walk through the process of building, customizing and running the AMD DockerHub Tensorflow images on Frontier.   
 
-### vLLM
-On the other side of AI, we have inferencing.
-This is where we use the trained model from the deep learning frameworks like PyTorch and actually use them.
-vLLM is an example inferencing application we can use to run trained models on containers on Frontier.
-AMD also provides a few vLLM images on the ROCm registry!
-
-You can check out some examples we have at https://github.com/olcf/olcf_containers_examples/tree/main/frontier/sample_apps/vllm and https://github.com/olcf/olcf_containers_examples/tree/main/frontier/sample_apps/vllm_singlenode
-
-Let's look at an example that has been modified from the above examples to be easier to follow in this lab:
+## Accessing, Building and Running AMD DockerHub Images on Frontier. 
+For this example, we use Tensorflow images from the AMD DockerHub repository. 
+These are located at [rocm/tensorflow](https://hub.docker.com/r/rocm/tensorflow). 
+To build and run the AMD DockerHub Tensorflow image on Frontier, go to the `olcf_container_examples` 
+repository you cloned in the previous section
 
 ```
-cd examples/5_ai_inferencing
+cd olcf_container_examples/frontier/sample_apps/tensorflow
+
 ```
 
-If you want to continue playing around with the example, you can modify the code in `testprompt.py` to give different prompts to the service!
+There are two different examples within the tensorflow directory: the `single node` and `multi-node` examples. 
+We will start with the `single-node` and transition to the `multi-node` example.
+
+Build the latest rocm/tensorflow image on Frontier using
+
+``` 
+$ apptainer pull  tensorflow_latest.sif docker://rocm/tensorflow:latest
+$ cd single-node
+
+$ sbatch submit.sbatch
+
+```
+
+Take a moment to inspect the `submit.sbatch` script for both examples in this directory. 
+This will help in realizing the difference in running tensorflow on a single node 
+and across multiple nodes where a Tensorflow Config (`TF_CONFIG`) is required.
+The output file from running the single node example will be in the logs folder in the current directory. 
+
+
+You are now ready to attempt the multi-node example. 
+Take a moment to glance through the `README.md` file in this directory. 
+This will help you understand the process of distributed training with data parallelism within tensorflow. 
+```
+$ cd ../multi-node
+
+$ sbatch submit.sbatch
+
+```
+
+The output from running this example should be in the `logs` directory of your current working directory. 
+The `tf.distribute.MultiWorkerMirroredStrategy` API is used in this multi-node distributed tensorflow example
+and the `TF_CONFIG` configuration is defined within the `submit.sbatch` script with two `workers`. 
+
+
+**Pause for exercise:** Navigate to `exercises/5_amddockerhubai` and complete the
+exercise where you will build an AMD Jax container and use it in running a Gaussian process regression. 
+
+
+## Running on Multiple Systems
+
+Sometimes there are reasons that you may want to run a single workflow
+on multiple machines, either here at the OLCF or at other user facilities.
+As we have shown previously we can run on Frontier by binding in the host MPI
+libraries; however, we can also run using the MPI packaged in the container
+itself.
+
+For this example we will show how to run a single LAMMPS container on Frontier and Andes.
+LAMMPS is a classical molecular dynamics simulation code focusing on materials modeling.
+To run on Frontier and Andes with the same MPI requires building with support
+for the Infiniband (Andes) and Slingshot (Frontier) network fabrics.
+To do this, we build MPICH in a container with the `ucx` and `libfabric` netmods enabled.
+
+To build our MPI container we will use a custom OLCF tool
+[Velocity](https://olcf.github.io/velocity/).
+We use this tool to build our base container images that we explained before.
+You can use the steps below to build the image for this example or pull the prebuilt image 
+from `savannah.ornl.gov/olcf-container-images/main:mpich_cpu_ubuntu`.
+
+``` bash
+module load miniforge3  # we need python >= 3.10
+# (optional) setup a python virtual environment
+python3 -m venv myenv
+source myenv/bin/activate
+# install velocity
+pip install olcf-velocity
+alias velocity="python3 -m velocity"
+# clone the OLCF image definitions
+git clone https://github.com/olcf/velocity-images.git
+# configure velocity
+export VELOCITY_IMAGE_PATH=$(realpath ./velocity-images)
+# build image
+velocity build mpich libfabric ucx gcc@0 cxi@12 -n mpich
+```
+Next we need to build LAMMPS. The script to do this can be found in `examples/6_multiple_systems/`.
+Then you can use the provided submit scripts to run the same container on
+Frontier and Andes (be sure to set your account properly in the batch scripts).
+
 
 # Resources
 
