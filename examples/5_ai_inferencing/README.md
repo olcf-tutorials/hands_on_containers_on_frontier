@@ -16,6 +16,11 @@ Download the vLLM container image from Dockerhub:
 apptainer pull --disable-cache vllm_rocm.sif docker://docker.io/rocm/vllm:rocm6.3.1_vllm_0.8.5_20250513
 ```
 
+> [!NOTE]
+> You may notice that the version of ROCm we are using is older than the current version of ROCm.
+> New vLLM images with newer versions of ROCm are not yet ready for Frontier.
+> We are working closely with AMD to bring first-class support for Frontier to the vLLM image.
+
 For your convenience in the case of long build times, a pre-built image has been made available here:
 ```bash
 /lustre/orion/stf007/world-shared/2026-hands-on-containers/vllm_rocm.sif
