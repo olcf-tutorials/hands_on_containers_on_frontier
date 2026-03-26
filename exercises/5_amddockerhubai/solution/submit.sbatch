@@ -6,6 +6,7 @@
 #SBATCH -t 00:30:00
 #SBATCH -p batch
 #SBATCH -N 4
+# #SBATCH --reservation=container_training
 
 export all_proxy=socks://proxy.ccs.ornl.gov:3128/
 export ftp_proxy=ftp://proxy.ccs.ornl.gov:3128/
@@ -27,4 +28,4 @@ set -ex
 echo "About to Run Apptainer Exec"
 
 #Run Script 
-time srun -N4 -n32 --tasks-per-node=8 -c7 --gpus-per-task=1 --gpu-bind=closest apptainer exec --workdir `pwd` jax_latest.sif  ./pyrun_gaussian_regression.sh
+time srun -N4 -n32 --tasks-per-node=8 -c7 --gpus-per-task=1 --gpu-bind=closest apptainer exec --workdir `pwd` jax_latest.sif  ./pyrun_mnist.sh
