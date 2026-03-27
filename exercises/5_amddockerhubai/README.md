@@ -1,4 +1,4 @@
-In this exercise, create an AMD dockerhub Jax image and use it in running a 4 node Jax `Gaussian process regression` test. Use the latest tagged jax image from the AMD dockerhub. 
+In this exercise, create an AMD dockerhub Jax image and use it in running a 4 node Jax `mnist classifier` test. Use the latest tagged jax image from the AMD dockerhub. 
 
 Obtain the Jax test from the Jax repo [here](https://github.com/jax-ml/jax/tree/main/) and access the `mnist_classifier.py` test from the `examples` directory. 
 
